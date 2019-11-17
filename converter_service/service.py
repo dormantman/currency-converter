@@ -48,7 +48,7 @@ class ConverterHandler(BaseHTTPRequestHandler):
 
         elif path == '/get_currency':
             try:
-                to_currency = params['to'][0]
+                to_currency = params['to'][0].upper()
                 amount = float(params['amount'][0])
 
             except KeyError as error:
