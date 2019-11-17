@@ -47,15 +47,6 @@ class ConverterHandler(BaseHTTPRequestHandler):
             self._send_template('index.html')
 
         elif path == '/get_currency':
-            parser = CurrencyParser()
-            data = parser.get_currency()
-            parser_error = data.get('error')
-
-            if parser_error:
-                logging.info('Error getting data from service')
-
-                return self._return_json(parser_error, status_code=422)
-
             try:
                 to_currency = params['to'][0]
                 amount = float(params['amount'][0])
@@ -71,6 +62,19 @@ class ConverterHandler(BaseHTTPRequestHandler):
 
                 error = {'error': 'Invalid data format. Amount data must be a number'}
                 return self._return_json(error, status_code=422)
+
+            if to_currency not in ['USD', 'RUB']:
+                error = {'error': 'Invalid currency'}
+                return self._return_json(error, status_code=422)
+
+            parser = CurrencyParser()
+            data = parser.get_currency()
+            parser_error = data.get('error')
+
+            if parser_error:
+                logging.info('Error getting data from service')
+
+                return self._return_json(parser_error, status_code=422)
 
             response = {
                 'currency': data,
@@ -95,10 +99,6 @@ class ConverterHandler(BaseHTTPRequestHandler):
                 response['to'] = 'RUB'
                 response['amount'] = amount
                 response['total'] = total
-
-            else:
-                error = {'error': 'Invalid currency'}
-                return self._return_json(error, status_code=422)
 
             self._return_json(response, status_code=200)
 
